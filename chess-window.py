@@ -5,7 +5,14 @@ pygame.init() # initialize all imported pygame modules. No exceptions will be ra
 
 WIDTH = 800; HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Chess")
+pygame.display.set_caption("Chess Online")
+
+
+bq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-queen.png").convert()
+bq = pygame.transform.smoothscale(bq, (100, 100)) 
+
+wq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-queen.png").convert_alpha()
+wq = pygame.transform.smoothscale(wq, (100, 100)) 
 
 # colors
 BLUE = (0, 150, 255)
@@ -68,6 +75,7 @@ def draw(grid, lambda_draw_grid):
     
     # draw lines. All the needed argument already passed before call
     lambda_draw_grid()
+    SCREEN.blit(wq, (200, 300))
     
     pygame.display.update() # Called only once per frame.
 
@@ -81,16 +89,14 @@ def get_node(coordinate, grid, rows, width_of_screen):
     return grid[x][y]
 
 def main():
-    fps = 60
-    fps_clock = pygame.time.Clock()
+
     
     rows  = 8
     grid = make_grid(rows, WIDTH)
     
     while True:
-        
         draw(grid,lambda:draw_grid(rows, WIDTH))
-        
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
