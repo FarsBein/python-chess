@@ -59,6 +59,9 @@ class Node:
         self.piece_name = None
         self.picked = False
     
+    def get_row_col(self):
+        return (self.row,self.col)
+    
     def selected(self):
         self.picked = True    
     
@@ -73,6 +76,12 @@ class Node:
         self.piece = None
         self.piece_name = None
         return temp
+    
+    def get_piece_color(self):
+        if self.piece_name:
+            return self.piece_name[0]
+        else:
+            return None
     
     def get_piece_name(self):
         return self.piece_name
@@ -170,6 +179,57 @@ def get_node(coordinate, grid, rows, width_of_screen):
     
     return grid[x][y]
 
+def king_moves(node, grid):
+    pass
+
+def queen_moves(node, grid):
+    pass
+
+def horse_moves(node, grid):
+    pass
+
+def bishop_moves(node, grid):
+    pass
+
+def castle_moves(node, grid):
+    pass
+
+def pawn_moves(node, grid):
+    
+    color = node.get_piece_color()
+    
+    col,row = node.get_row_col()
+    possible_moves = []
+    if color == 'b':
+        if grid[row-1][col].get_piece_color() != node.get_piece_color():
+            possible_moves.append((col,row-1))
+        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
+            possible_moves.append((col-1,row-1))
+        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
+            possible_moves.append((col+1,row-1))
+    else:
+        if grid[row+1][col].get_piece_color() != node.get_piece_color():
+            possible_moves.append((col,row+1))
+        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
+            possible_moves.append((col-1,row+1))
+        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
+            possible_moves.append((col+1,row+1))
+    print('possible_moves:', possible_moves)
+    
+    return possible_moves
+def validate_move(start, end, grid):
+    if start.get_piece_color() == end.get_piece_color():
+        return False
+
+    piece = start.get_piece_name()[1] # e.g. 'bp' -> 'p' which is queen
+    
+    if piece == 'p':
+        possible_moves = pawn_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False
+
 def main():
     rows = 8
     grid = make_grid(rows, WIDTH)
@@ -186,12 +246,13 @@ def main():
                 
             if pygame.mouse.get_pressed()[0]: # left click
                 node = get_node(event.pos, grid, rows, WIDTH)
-                print('LEFT:  ',node)
+                print('LEFT:  ',node, node.get_piece_name(), picked, node.empty())
                 if not picked:
-                    picked = node
-                    node.selected()
+                    if not node.empty():
+                        picked = node
+                        node.selected()
                 else:
-                    if node.empty():
+                    if validate_move(picked, node, grid):
                         node.set_piece(picked.make_empty())
                     picked.unselected()
                     picked = None
