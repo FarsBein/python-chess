@@ -7,12 +7,12 @@ WIDTH = 800; HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Online")
 
-
-bq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-queen.png").convert()
+bq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-queen.png").convert_alpha()
 bq = pygame.transform.smoothscale(bq, (100, 100)) 
-
 wq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-queen.png").convert_alpha()
 wq = pygame.transform.smoothscale(wq, (100, 100)) 
+
+pieces = {'wq':wq,'bq':bq}
 
 # colors
 BLUE = (0, 150, 255)
@@ -33,12 +33,47 @@ class Node:
         self.y = width * col
         self.width = width
         self.color = PALE if ((col+(row%2))%2 == 0) else GREEN
-
+        self.piece = None
+        self.piece_name = None
+        self.picked = False
+    
+    def selected(self):
+        self.picked = True    
+    
+    def unselected(self):
+        self.picked = False  
+    
+    def empty(self):
+        return self.piece == None
+    
+    def make_empty(self):
+        temp = self.piece_name 
+        self.piece = None
+        self.piece_name = None
+        return temp
+    
+    def get_piece_name(self):
+        return self.piece_name
+    
+    def get_piece(self):
+        return self.piece_name
+    
+    def set_piece(self, piece_name):
+        self.piece_name = piece_name
+        self.piece = pieces[piece_name]
+    
     def draw(self):
-        pygame.draw.rect(SCREEN, self.color, [self.x,self.y, self.width, self.width])
-        
+        if self.picked:
+            pygame.draw.rect(SCREEN, RED, [self.x,self.y, self.width, self.width])
+        else:
+            pygame.draw.rect(SCREEN, self.color, [self.x,self.y, self.width, self.width])
+    
+    def draw_piece(self):
+        if self.piece:
+            SCREEN.blit(self.piece, (self.x, self.y))
+    
     def __str__(self): 
-        return '(row: ' + str(self.row) + ' ,col: ' + str(self.col) + ' ) ' + '(x: ' + str(self.x) + ' ,y: ' + str(self.x) + ' ) '
+        return '(row: ' + str(self.row) + ' ,col: ' + str(self.col) + ' ) ' + '(x: ' + str(self.x) + ' ,y: ' + str(self.x) + ' ) ' + 'piece: ' + str(self.piece)
 
     def __lt__(self, other): # to avoid error when compared
         return False
@@ -51,8 +86,9 @@ def make_grid(rows, width_of_screen):
         grid.append([])
         for j in range(rows):
             node = Node(i,j,node_width)
+            if j in [0,1,6,7]: 
+                node.set_piece('wq')
             grid[i].append(node)
-    
     return grid
 
 def draw_grid(rows, width_of_screen):
@@ -71,11 +107,12 @@ def draw(grid, lambda_draw_grid):
     # draw the nodes first before lines to see lines
     for row in grid:
         for node in row:
-            node.draw()
-    
+            node.draw()        # draw box with color
+            node.draw_piece()  # draw piece
+            
     # draw lines. All the needed argument already passed before call
     lambda_draw_grid()
-    SCREEN.blit(wq, (200, 300))
+    
     
     pygame.display.update() # Called only once per frame.
 
@@ -89,10 +126,10 @@ def get_node(coordinate, grid, rows, width_of_screen):
     return grid[x][y]
 
 def main():
-
-    
     rows  = 8
     grid = make_grid(rows, WIDTH)
+    
+    picked = None
     
     while True:
         draw(grid,lambda:draw_grid(rows, WIDTH))
@@ -105,7 +142,22 @@ def main():
             if pygame.mouse.get_pressed()[0]: # left click
                 node = get_node(event.pos, grid, rows, WIDTH)
                 print('LEFT:  ',node)
-                
+                if not picked:
+                    picked = node
+                    node.selected()
+                else:
+                    if node.empty():
+                        node.set_piece(picked.make_empty())
+                    picked.unselected()
+                    picked = None
+                    
+            if pygame.mouse.get_pressed()[2]: # right click
+                node = get_node(event.pos, grid, rows, WIDTH)
+                print('RIGHT:  ',node.get_piece_name())
+                if picked:
+                    picked.unselected()
+                    picked = None
+
     pygame.display.update()
     
 main()
