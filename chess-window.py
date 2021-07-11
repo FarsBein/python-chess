@@ -7,12 +7,34 @@ WIDTH = 800; HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Online")
 
-bq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-queen.png").convert_alpha()
-bq = pygame.transform.smoothscale(bq, (100, 100)) 
+# white pieces
+wk = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-king.png").convert_alpha()
+wk = pygame.transform.smoothscale(wk, (100, 100)) 
 wq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-queen.png").convert_alpha()
 wq = pygame.transform.smoothscale(wq, (100, 100)) 
+wc = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-castle.png").convert_alpha()
+wc = pygame.transform.smoothscale(wc, (100, 100)) 
+wh = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-horse.png").convert_alpha()
+wh = pygame.transform.smoothscale(wh, (100, 100)) 
+wb = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-bishop.png").convert_alpha()
+wb = pygame.transform.smoothscale(wb, (100, 100)) 
+wp = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-pawn.png").convert_alpha()
+wp = pygame.transform.smoothscale(wp, (100, 100)) 
+# black pieces
+bk = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-king.png").convert_alpha()
+bk = pygame.transform.smoothscale(bk, (100, 100)) 
+bq = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-queen.png").convert_alpha()
+bq = pygame.transform.smoothscale(bq, (100, 100)) 
+bc = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-castle.png").convert_alpha()
+bc = pygame.transform.smoothscale(bc, (100, 100)) 
+bh = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-horse.png").convert_alpha()
+bh = pygame.transform.smoothscale(bh, (100, 100)) 
+bb = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-bishop.png").convert_alpha()
+bb = pygame.transform.smoothscale(bb, (100, 100)) 
+bp = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\black-pawn.png").convert_alpha()
+bp = pygame.transform.smoothscale(bp, (100, 100)) 
 
-pieces = {'wq':wq,'bq':bq}
+pieces = {'wk':wk,'wq':wq,'wc':wc,'wh':wh,'wb':wb,'wp':wp,'bk':bk,'bq':bq,'bc':bc,'bh':bh,'bb':bb,'bp':bp}
 
 # colors
 BLUE = (0, 150, 255)
@@ -82,13 +104,36 @@ def make_grid(rows, width_of_screen):
     grid = []
     node_width = width_of_screen // rows
     
-    for i in range(rows):
+    for col in range(rows):
         grid.append([])
-        for j in range(rows):
-            node = Node(i,j,node_width)
-            if j in [0,1,6,7]: 
+        for row in range(rows):
+            node = Node(col,row,node_width)
+            if row == 1: 
+                node.set_piece('wp')
+            elif row == 6: 
+                node.set_piece('bp')
+            elif row == 0 and (col == 0 or col == rows-1): 
+                node.set_piece('wc')
+            elif row == rows-1 and (col == 0 or col == rows-1): 
+                node.set_piece('bc')
+            elif row == 0 and (col == 1 or col == 6): 
+                node.set_piece('wh')
+            elif row == rows-1 and (col == 1 or col == 6): 
+                node.set_piece('bh')
+            elif row == 0 and (col == 2 or col == 5): 
+                node.set_piece('wb')
+            elif row == rows-1 and (col == 2 or col == 5): 
+                node.set_piece('bb')
+            elif row == 0 and col == 3:
                 node.set_piece('wq')
-            grid[i].append(node)
+            elif row == rows-1 and col == 3:
+                node.set_piece('bq')
+            elif row == 0 and col == 4:
+                node.set_piece('wk')
+            elif row == rows-1 and col == 4:
+                node.set_piece('bk')
+                
+            grid[col].append(node)
     return grid
 
 def draw_grid(rows, width_of_screen):
@@ -126,7 +171,7 @@ def get_node(coordinate, grid, rows, width_of_screen):
     return grid[x][y]
 
 def main():
-    rows  = 8
+    rows = 8
     grid = make_grid(rows, WIDTH)
     
     picked = None
