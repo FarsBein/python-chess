@@ -51,8 +51,8 @@ class Node:
     def __init__(self, row, col, width):
         self.row = row
         self.col = col
-        self.x = width * row
-        self.y = width * col
+        self.x = width * col
+        self.y = width * row
         self.width = width
         self.color = PALE if ((col+(row%2))%2 == 0) else GREEN
         self.piece = None
@@ -90,8 +90,9 @@ class Node:
         return self.piece_name
     
     def set_piece(self, piece_name):
-        self.piece_name = piece_name
-        self.piece = pieces[piece_name]
+        if piece_name:
+            self.piece_name = piece_name
+            self.piece = pieces[piece_name]
     
     def draw(self):
         if self.picked:
@@ -104,19 +105,18 @@ class Node:
             SCREEN.blit(self.piece, (self.x, self.y))
     
     def __str__(self): 
-        return '(row: ' + str(self.row) + ' ,col: ' + str(self.col) + ' ) ' + '(x: ' + str(self.x) + ' ,y: ' + str(self.x) + ' ) ' + 'piece: ' + str(self.piece)
+        return '(row: ' + str(self.row) + ' ,col: ' + str(self.col) + ' ) ' + '(x: ' + str(self.x) + ' ,y: ' + str(self.y) + ' ) ' + 'piece: ' + str(self.piece_name)
 
     def __lt__(self, other): # to avoid error when compared
         return False
 
 def make_grid(rows, width_of_screen):
     grid = []
-    node_width = width_of_screen // rows
-    
-    for col in range(rows):
+    node_width = width_of_screen // rows    
+    for row in range(rows):
         grid.append([])
-        for row in range(rows):
-            node = Node(col,row,node_width)
+        for col in range(rows):
+            node = Node(row,col,node_width)
             if row == 1: 
                 node.set_piece('wp')
             elif row == 6: 
@@ -141,8 +141,8 @@ def make_grid(rows, width_of_screen):
                 node.set_piece('wk')
             elif row == rows-1 and col == 4:
                 node.set_piece('bk')
-                
-            grid[col].append(node)
+            
+            grid[row].append(node)
     return grid
 
 def draw_grid(rows, width_of_screen):
@@ -177,7 +177,7 @@ def get_node(coordinate, grid, rows, width_of_screen):
     x = x//node_width
     y = y//node_width
     
-    return grid[x][y]
+    return grid[y][x]
 
 def king_moves(node, grid):
     pass
@@ -195,28 +195,32 @@ def castle_moves(node, grid):
     pass
 
 def pawn_moves(node, grid):
-    
     color = node.get_piece_color()
-    
-    col,row = node.get_row_col()
+    row, col = node.get_row_col()
     possible_moves = []
     if color == 'b':
-        if grid[row-1][col].get_piece_color() != node.get_piece_color():
-            possible_moves.append((col,row-1))
-        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
-            possible_moves.append((col-1,row-1))
-        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
-            possible_moves.append((col+1,row-1))
+        if row == 6 and grid[row-2][col].empty(): # using 6 instead of ROWS
+            possible_moves.append((row-2,col))
+        if grid[row-1][col].empty():
+            possible_moves.append((row-1,col))
+        if node.get_piece_color() != grid[row-1][col-1].get_piece_color() != None:
+            possible_moves.append((row-1,col-1))
+        if node.get_piece_color() != grid[row-1][col+1].get_piece_color() != None:
+            possible_moves.append((row-1,col+1))
     else:
-        if grid[row+1][col].get_piece_color() != node.get_piece_color():
-            possible_moves.append((col,row+1))
+        if row == 1 and grid[row+2][col].empty():
+            possible_moves.append((row+2,col))
+        if grid[row+1][col].empty():
+            possible_moves.append((row+1,col))
         if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
-            possible_moves.append((col-1,row+1))
-        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
-            possible_moves.append((col+1,row+1))
-    print('possible_moves:', possible_moves)
+            possible_moves.append((row+1,col-1))
+        if node.get_piece_color() != grid[row+1][col+1].get_piece_color() != None:
+            possible_moves.append((row+1,col+1))
+            
+    print('pawn possible_moves:', possible_moves)
     
     return possible_moves
+
 def validate_move(start, end, grid):
     if start.get_piece_color() == end.get_piece_color():
         return False
@@ -246,7 +250,7 @@ def main():
                 
             if pygame.mouse.get_pressed()[0]: # left click
                 node = get_node(event.pos, grid, rows, WIDTH)
-                print('LEFT:  ',node, node.get_piece_name(), picked, node.empty())
+                print('LEFT: ',node,'picked:', picked, 'empty:',node.empty())
                 if not picked:
                     if not node.empty():
                         picked = node
