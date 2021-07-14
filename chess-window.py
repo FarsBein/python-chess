@@ -62,6 +62,12 @@ class Node:
     def get_row_col(self):
         return (self.row,self.col)
     
+    def is_opposite(self, color):
+        if self.get_piece_color():
+            return self.get_piece_color() != color
+        else:
+            return False
+    
     def selected(self):
         self.picked = True    
     
@@ -189,8 +195,45 @@ def horse_moves(node, grid):
     pass
 
 def bishop_moves(node, grid):
-    pass
+    
+    color = node.get_piece_color()
+    row, col = node.get_row_col()
+    possible_moves = []
+    
+    dx,dy = row, col
+    # top right
+    while ((0 <= dx-1 <= 7) and (0 <= dy+1 <= 7)) and (grid[dx-1][dy+1].empty() or grid[dx-1][dy+1].get_piece_color() != color):
+        possible_moves.append((dx-1,dy+1))
+        if grid[dx-1][dy+1].is_opposite(color):
+            break
+        dx,dy = dx-1,dy+1
 
+    dx,dy = row, col
+    # top left
+    while ((0 <= dx-1 <= 7) and (0 <= dy-1 <= 7)) and (grid[dx-1][dy-1].empty() or grid[dx-1][dy-1].get_piece_color() != color):
+        possible_moves.append((dx-1,dy-1))
+        if grid[dx-1][dy-1].is_opposite(color):
+            break
+        dx,dy = dx-1,dy-1
+
+    dx,dy = row, col    
+    # bottom right
+    while ((0 <= dx+1 <= 7) and (0 <= dy+1 <= 7)) and (grid[dx+1][dy+1].empty() or grid[dx+1][dy+1].get_piece_color() != color):
+        possible_moves.append((dx+1,dy+1))
+        if grid[dx+1][dy+1].is_opposite(color):
+            break
+        dx,dy = dx+1,dy+1
+
+    dx,dy = row, col
+    # bottom left
+    while ((0 <= dx+1 <= 7) and (0 <= dy-1 <= 7)) and (grid[dx+1][dy-1].empty() or grid[dx+1][dy-1].get_piece_color() != color):
+        possible_moves.append((dx+1,dy-1))
+        if grid[dx+1][dy-1].is_opposite(color):
+            break
+        dx,dy = dx+1,dy-1
+       
+    print('bishop possible_moves:', possible_moves)
+    return possible_moves
 def castle_moves(node, grid):
     pass
 
@@ -233,6 +276,12 @@ def validate_move(start, end, grid):
             return True
         else:
             return False
+    elif piece == 'b':
+        possible_moves = bishop_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False
 
 def main():
     rows = 8
@@ -263,7 +312,7 @@ def main():
                     
             if pygame.mouse.get_pressed()[2]: # right click
                 node = get_node(event.pos, grid, rows, WIDTH)
-                print('RIGHT:  ',node.get_piece_name())
+                print('RIGHT: ',node,'picked:', picked, 'empty:',node.empty())
                 if picked:
                     picked.unselected()
                     picked = None
