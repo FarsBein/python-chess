@@ -186,10 +186,37 @@ def get_node(coordinate, grid, rows, width_of_screen):
     return grid[y][x]
 
 def king_moves(node, grid):
-    pass
+    color = node.get_piece_color()
+    row, col = node.get_row_col()
+    possible_moves = []
+    
+    movements = [
+        (row-1,col+1),
+        (row-1,col-1),
+        (row-1,col),
+        (row,col+1),
+        (row,col-1),
+        (row+1,col+1),
+        (row+1,col-1),
+        (row+1,col),
+    ]
+
+    for dx,dy in movements:
+        if ((0 <= dx <= 7) and (0 <= dy <= 7)) and (grid[dx][dy].empty() or grid[dx][dy].get_piece_color() != color):
+            possible_moves.append((dx,dy))
+    
+    print('king possible_moves:', possible_moves)
+    return possible_moves
 
 def queen_moves(node, grid):
-    pass
+    
+    possible_moves = []
+    
+    possible_moves += bishop_moves(node, grid)
+    possible_moves += castle_moves(node, grid)
+    
+    print('queen possible_moves:', possible_moves)
+    return possible_moves
 
 def horse_moves(node, grid):
     color = node.get_piece_color()
@@ -357,7 +384,18 @@ def validate_move(start, end, grid):
             return True
         else:
             return False
-        
+    elif piece == 'k':
+        possible_moves = king_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False
+    elif piece == 'q':
+        possible_moves = queen_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False
 def main():
     rows = 8
     grid = make_grid(rows, WIDTH)
