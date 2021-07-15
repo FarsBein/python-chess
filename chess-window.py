@@ -221,7 +221,7 @@ def bishop_moves(node, grid):
     
     dx,dy = row, col
     # top right
-    while ((0 <= dx-1 <= 7) and (0 <= dy+1 <= 7)) and (grid[dx-1][dy+1].empty() or grid[dx-1][dy+1].get_piece_color() != color):
+    while in_range_7(dx-1,dy+1) and (grid[dx-1][dy+1].empty() or grid[dx-1][dy+1].get_piece_color() != color):
         possible_moves.append((dx-1,dy+1))
         if grid[dx-1][dy+1].is_opposite(color):
             break
@@ -229,7 +229,7 @@ def bishop_moves(node, grid):
 
     dx,dy = row, col
     # top left
-    while ((0 <= dx-1 <= 7) and (0 <= dy-1 <= 7)) and (grid[dx-1][dy-1].empty() or grid[dx-1][dy-1].get_piece_color() != color):
+    while in_range_7(dx-1,dy-1) and (grid[dx-1][dy-1].empty() or grid[dx-1][dy-1].get_piece_color() != color):
         possible_moves.append((dx-1,dy-1))
         if grid[dx-1][dy-1].is_opposite(color):
             break
@@ -237,7 +237,7 @@ def bishop_moves(node, grid):
 
     dx,dy = row, col    
     # bottom right
-    while ((0 <= dx+1 <= 7) and (0 <= dy+1 <= 7)) and (grid[dx+1][dy+1].empty() or grid[dx+1][dy+1].get_piece_color() != color):
+    while in_range_7(dx+1,dy+1) and (grid[dx+1][dy+1].empty() or grid[dx+1][dy+1].get_piece_color() != color):
         possible_moves.append((dx+1,dy+1))
         if grid[dx+1][dy+1].is_opposite(color):
             break
@@ -245,7 +245,7 @@ def bishop_moves(node, grid):
 
     dx,dy = row, col
     # bottom left
-    while ((0 <= dx+1 <= 7) and (0 <= dy-1 <= 7)) and (grid[dx+1][dy-1].empty() or grid[dx+1][dy-1].get_piece_color() != color):
+    while in_range_7(dx+1,dy-1) and (grid[dx+1][dy-1].empty() or grid[dx+1][dy-1].get_piece_color() != color):
         possible_moves.append((dx+1,dy-1))
         if grid[dx+1][dy-1].is_opposite(color):
             break
@@ -255,7 +255,44 @@ def bishop_moves(node, grid):
     return possible_moves
 
 def castle_moves(node, grid):
-    pass
+    color = node.get_piece_color()
+    row, col = node.get_row_col()
+    possible_moves = []
+    
+    dx,dy = row, col
+    # top 
+    while in_range_7(dy+1) and (grid[dx][dy+1].empty() or grid[dx][dy+1].get_piece_color() != color):
+        possible_moves.append((dx,dy+1))
+        if grid[dx][dy+1].is_opposite(color):
+            break
+        dx,dy = dx,dy+1
+
+    dx,dy = row, col
+    # bottom
+    while in_range_7(dy-1) and (grid[dx][dy-1].empty() or grid[dx][dy-1].get_piece_color() != color):
+        possible_moves.append((dx,dy-1))
+        if grid[dx][dy-1].is_opposite(color):
+            break
+        dx,dy = dx,dy-1
+
+    dx,dy = row, col    
+    # right
+    while in_range_7(dx+1) and (grid[dx+1][dy].empty() or grid[dx+1][dy].get_piece_color() != color):
+        possible_moves.append((dx+1,dy))
+        if grid[dx+1][dy].is_opposite(color):
+            break
+        dx,dy = dx+1,dy
+
+    dx,dy = row, col
+    # left
+    while in_range_7(dx-1) and (grid[dx-1][dy].empty() or grid[dx-1][dy].get_piece_color() != color):
+        possible_moves.append((dx-1,dy))
+        if grid[dx-1][dy].is_opposite(color):
+            break
+        dx,dy = dx-1,dy
+    
+    print('castle possible_moves:', possible_moves)
+    return possible_moves
 
 def pawn_moves(node, grid):
     color = node.get_piece_color()
@@ -264,25 +301,31 @@ def pawn_moves(node, grid):
     if color == 'b':
         if row == 6 and grid[row-2][col].empty(): # using 6 instead of ROWS
             possible_moves.append((row-2,col))
-        if grid[row-1][col].empty():
+        if in_range_7(row-1) and grid[row-1][col].empty():
             possible_moves.append((row-1,col))
-        if node.get_piece_color() != grid[row-1][col-1].get_piece_color() != None:
+        if in_range_7(row-1,col-1) and node.get_piece_color() != grid[row-1][col-1].get_piece_color() != None:
             possible_moves.append((row-1,col-1))
-        if node.get_piece_color() != grid[row-1][col+1].get_piece_color() != None:
+        if in_range_7(row-1,col+1) and node.get_piece_color() != grid[row-1][col+1].get_piece_color() != None:
             possible_moves.append((row-1,col+1))
     else:
         if row == 1 and grid[row+2][col].empty():
             possible_moves.append((row+2,col))
-        if grid[row+1][col].empty():
+        if in_range_7(row+1,col) and grid[row+1][col].empty():
             possible_moves.append((row+1,col))
-        if node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
+        if in_range_7(row+1,col-1) and node.get_piece_color() != grid[row+1][col-1].get_piece_color() != None:
             possible_moves.append((row+1,col-1))
-        if node.get_piece_color() != grid[row+1][col+1].get_piece_color() != None:
+        if in_range_7(row+1,col+1) and node.get_piece_color() != grid[row+1][col+1].get_piece_color() != None:
             possible_moves.append((row+1,col+1))
             
     print('pawn possible_moves:', possible_moves)
     
     return possible_moves
+
+def in_range_7(dx,dy=None):
+    if dy:
+        return ((0 <= dx <= 7) and (0 <= dy <= 7))
+    else:
+        return (0 <= dx <= 7)
 
 def validate_move(start, end, grid):
     if start.get_piece_color() == end.get_piece_color():
@@ -296,6 +339,12 @@ def validate_move(start, end, grid):
             return True
         else:
             return False
+    elif piece == 'c':
+        possible_moves = castle_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False    
     elif piece == 'b':
         possible_moves = bishop_moves(start, grid)
         if end.get_row_col() in possible_moves:
