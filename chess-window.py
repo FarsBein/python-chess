@@ -192,10 +192,29 @@ def queen_moves(node, grid):
     pass
 
 def horse_moves(node, grid):
-    pass
-
-def bishop_moves(node, grid):
+    color = node.get_piece_color()
+    row, col = node.get_row_col()
+    possible_moves = []
     
+    movements = [
+        (row-2,col+1),
+        (row-2,col-1),
+        (row-1,col+2),
+        (row-1,col-2),
+        (row+2,col+1),
+        (row+2,col-1),
+        (row+1,col+2),
+        (row+1,col-2),
+    ]
+
+    for dx,dy in movements:
+        if ((0 <= dx <= 7) and (0 <= dy <= 7)) and (grid[dx][dy].empty() or grid[dx][dy].get_piece_color() != color):
+            possible_moves.append((dx,dy))
+    
+    print('horse possible_moves:', possible_moves)
+    return possible_moves
+   
+def bishop_moves(node, grid):
     color = node.get_piece_color()
     row, col = node.get_row_col()
     possible_moves = []
@@ -234,6 +253,7 @@ def bishop_moves(node, grid):
        
     print('bishop possible_moves:', possible_moves)
     return possible_moves
+
 def castle_moves(node, grid):
     pass
 
@@ -282,7 +302,13 @@ def validate_move(start, end, grid):
             return True
         else:
             return False
-
+    elif piece == 'h':
+        possible_moves = horse_moves(start, grid)
+        if end.get_row_col() in possible_moves:
+            return True
+        else:
+            return False
+        
 def main():
     rows = 8
     grid = make_grid(rows, WIDTH)
