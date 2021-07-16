@@ -405,11 +405,14 @@ def main():
     
     picked = None
     
-    prev_piece = 'w'
+    prev_piece = 'b'
     
     clock.tick(20)
     
-    while True:
+    white_win = False
+    black_win = False
+    
+    while (not white_win and not black_win):
         draw(grid,lambda:draw_grid(rows, WIDTH))
         
         for event in pygame.event.get():
@@ -426,8 +429,17 @@ def main():
                         node.selected()
                 else:
                     if validate_move(picked, node, grid):
+                        temp_color = node.get_piece_color()
+                        temp_name = node.get_piece_name()[1] if node.get_piece_name() else None
                         node.set_piece(picked.make_empty())
                         prev_piece = node.get_piece_color()
+                        
+                        if temp_name == 'k':
+                            if temp_color == 'w':
+                                white_win = True
+                            else:
+                                black_win = True
+                            break
                     picked.unselected()
                     picked = None
                     
