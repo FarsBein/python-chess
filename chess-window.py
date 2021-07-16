@@ -6,6 +6,8 @@ pygame.init() # initialize all imported pygame modules. No exceptions will be ra
 WIDTH = 800; HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Online")
+clock = pygame.time.Clock()
+
 
 # white pieces
 wk = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-king.png").convert_alpha()
@@ -396,15 +398,20 @@ def validate_move(start, end, grid):
             return True
         else:
             return False
+
 def main():
     rows = 8
     grid = make_grid(rows, WIDTH)
     
     picked = None
     
+    prev_piece = 'w'
+    
+    clock.tick(20)
+    
     while True:
         draw(grid,lambda:draw_grid(rows, WIDTH))
-            
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -414,12 +421,13 @@ def main():
                 node = get_node(event.pos, grid, rows, WIDTH)
                 print('LEFT: ',node,'picked:', picked, 'empty:',node.empty())
                 if not picked:
-                    if not node.empty():
+                    if not node.empty() and (node.get_piece_color() != prev_piece):
                         picked = node
                         node.selected()
                 else:
                     if validate_move(picked, node, grid):
                         node.set_piece(picked.make_empty())
+                        prev_piece = node.get_piece_color()
                     picked.unselected()
                     picked = None
                     
