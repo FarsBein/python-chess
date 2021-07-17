@@ -411,7 +411,7 @@ def main():
     
     white_win = False
     black_win = False
-    
+
     while (not white_win and not black_win):
         draw(grid,lambda:draw_grid(rows, WIDTH))
         
@@ -436,9 +436,9 @@ def main():
                         
                         if temp_name == 'k':
                             if temp_color == 'w':
-                                white_win = True
-                            else:
                                 black_win = True
+                            else:
+                                white_win = True
                             break
                     picked.unselected()
                     picked = None
@@ -449,6 +449,26 @@ def main():
                 if picked:
                     picked.unselected()
                     picked = None
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    grid = make_grid(rows, WIDTH)
+                    picked = None
+                    prev_piece = 'b'
+                    white_win = False
+                    black_win = False
+                    
+    print("GAME OVER")
+    while True: 
+        SCREEN.fill(WHITE)
+        font = pygame.font.SysFont(None, 100)
+        img = font.render('BLACK WON!!!', True, BLACK) if black_win else font.render('WHITE WON!!!', True, BLACK)
+        SCREEN.blit(img, (150, 350))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
     pygame.display.update()
     
