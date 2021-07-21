@@ -18,6 +18,8 @@ def handle_client(conn, addr):
     connected = True
     while connected:
         msg_len = conn.recv(HEADER).decode(FORMATE) # not going to pass until recives a message something like default await in Javascript
+        if not msg_len: # no message
+            break
         msg_len = int(msg_len)
         msg = conn.recv(msg_len).decode(FORMATE)
         print(f"[{addr}]: \'{msg}\' ")
