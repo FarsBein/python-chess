@@ -22,7 +22,8 @@ def handle_client(conn, addr):
             break
         msg_len = int(msg_len)
         msg = conn.recv(msg_len).decode(FORMATE)
-        print(f"[{addr}]: \'{msg}\' ")
+        print(f"[{addr}]: {msg}")
+        # conn.send(f"you sent '{msg}' successfully!".encode(FORMATE))
         
         if msg == DISCONNECT_MSG:
             connected = False

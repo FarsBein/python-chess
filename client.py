@@ -17,11 +17,13 @@ def send(msg):
     send_len += b' ' * (HEADER - len(send_len)) # b' ' bit representation of ' '
     client.send(send_len)
     client.send(message)
+    print(client.recv(2048).decode(FORMATE))
 
 x=''
 while True:
     x = input()
     if x == 'q':
         send("bye!!!")
+        send(DISCONNECT_MSG)
         break
     send(x)
