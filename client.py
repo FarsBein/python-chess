@@ -1,4 +1,5 @@
 import socket
+from threading import Thread
 
 HEADER = 64 # len of msg in bites 
 PORT = 5050
@@ -17,13 +18,24 @@ def send(msg):
     send_len += b' ' * (HEADER - len(send_len)) # b' ' bit representation of ' '
     client.send(send_len)
     client.send(message)
-    print(client.recv(2048).decode(FORMATE))
-
-x=''
-while True:
+    
+def write():
     x = input()
     if x == 'q':
-        send("bye!!!")
-        send(DISCONNECT_MSG)
-        break
-    send(x)
+        return 'done'
+    else:
+        send(x)
+        return None
+
+def receive():
+    print(client.recv(2048).decode(FORMATE))
+
+while True:
+    s = Thread(target = write)
+    r = Thread(target = receive)
+    
+    s.start()
+    r.start()
+    
+
+    

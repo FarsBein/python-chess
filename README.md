@@ -4,3 +4,4 @@ chess game that utilizes socketserver and PyGame to create multiplayer online ch
 [x] game ends when king dies 
 [x] restart with a button
 [x] lose window notification
+[] two windows receiving changes

@@ -399,9 +399,9 @@ def validate_move(start, end, grid):
         else:
             return False
 
-def main():
+def main(grid=None):
     rows = 8
-    grid = make_grid(rows, WIDTH)
+    grid = grid if grid else make_grid(rows, WIDTH)
     
     picked = None
     
