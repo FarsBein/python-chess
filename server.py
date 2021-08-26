@@ -7,39 +7,52 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMATE = "utf-8"
 DISCONNECT_MSG = "!DISCONNECT"
-conn_clients = []
+clients = []
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
+server.listen(2)
 
-def handle_client(conn, addr):
-    print(conn_clients, len(conn_clients))
-    print(f"[NEW CONNECTION] {addr} connected!")
-    connected = True
-    while connected:
-        msg_len = conn.recv(HEADER).decode(FORMATE) # not going to pass until recives a message something like default await in Javascript
-        if not msg_len: # no message
-            break
-        msg_len = int(msg_len)
-        msg = conn.recv(msg_len).decode(FORMATE) 
-        print(f"[{addr}]: {msg}")
-        for c in conn_clients:
-            c.send(f"'{msg}' was sent!".encode(FORMATE))
-        
-        if msg == DISCONNECT_MSG:
-            connected = False
-    conn.close()
 
-def start():
-    server.listen()
-    print(f"[LISTINING] Server is listing on {SERVER}")
+def broadcast(message, exception = None):
+    for client in clients:
+        if not exception or exception != client:
+            client.send(message)
+
+def client_left(client):
+    clients.remove(client)
+    client.close()
+    broadcast(f'A client has left the chat room!, total: {len(clients)}'.encode('utf-8'))
+
+# Function to receive clients' connections
+def handle_client(client, address):
     while True:
-        conn, addr = server.accept() # when knew connection is found store the values
-        conn_clients.append(conn)
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
-        print(f"[ACTIVE CONNECTION] {threading.activeCount() - 1}") # (-1) for removing the start listening and capturing thread 
-        
-print('[STRARTING] server is starting...')
-start()  
+        try:
+            message = client.recv(1024)
+            if message.decode() == 'quit' or message.decode() == 'q': 
+                client.send('quit'.encode('utf-8'))
+                break
+            print(f'{str(address)}: ', message.decode())
+            broadcast(message, client)
+        except:
+            break
+    client_left(client)
     
+# Main function to receive the clients connection
+def receive():
+    while True:
+        print('Server is running and listening ...')
+        client, address = server.accept()
+        
+        print(f'connection is established with {str(address)}')
+        
+        clients.append(client)
+        
+        broadcast(f'New client has connected, total: {len(clients)}'.encode('utf-8'), client)
+        client.send('you are now connected!'.encode('utf-8'))
+        
+        
+        thread = threading.Thread(target=handle_client, args=(client,address))
+        thread.start()
+
+receive()
