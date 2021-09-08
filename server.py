@@ -1,5 +1,6 @@
 import socket
 import threading
+import pickle
 
 HEADER = 64 # len of msg in bites 
 PORT = 5050
@@ -29,11 +30,13 @@ def handle_client(client, address):
     while True:
         try:
             message = client.recv(1024)
-            if message.decode() == 'quit' or message.decode() == 'q': 
-                client.send('quit'.encode('utf-8'))
-                break
-            print(f'{str(address)}: ', message.decode())
-            broadcast(message, client)
+            print(pickle.loads(message))
+            
+            # if message.decode() == 'quit' or message.decode() == 'q': 
+            #     client.send('quit'.encode('utf-8'))
+            #     break
+            # print(f'{str(address)}: ', message.decode())
+            # broadcast(message, client)
         except:
             break
     client_left(client)
@@ -49,9 +52,13 @@ def receive():
         clients.append(client)
         
         broadcast(f'New client has connected, total: {len(clients)}'.encode('utf-8'), client)
-        client.send('you are now connected!'.encode('utf-8'))
+        # client.send('you are now connected!'.encode('utf-8'))
         
-        
+        if len(clients) == 1:
+            client.send('w'.encode('utf-8'))
+        else:
+            client.send('b'.encode('utf-8'))
+            
         thread = threading.Thread(target=handle_client, args=(client,address))
         thread.start()
 

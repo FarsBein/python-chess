@@ -1,5 +1,6 @@
 import socket
 import threading
+# import chess_window
 
 HEADER = 64 # len of msg in bites 
 PORT = 5050
@@ -7,6 +8,9 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMATE = "utf-8"
 DISCONNECT_MSG = "!DISCONNECT"
+
+colors = {'b':'w', 'w':'b'}
+color = None
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
@@ -40,6 +44,7 @@ def client_send():
 
 receive_thread = threading.Thread(target=client_receive)
 receive_thread.start()
-
 send_thread = threading.Thread(target=client_send)
-send_thread.start()
+send_thread.start() 
+
+# chess_window.main()

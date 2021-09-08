@@ -7,7 +7,7 @@ WIDTH = 800; HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Online")
 clock = pygame.time.Clock()
-
+ROWS = 8
 
 # white pieces
 wk = pygame.image.load(r"C:\Users\User\Desktop\dev\projects\python-chess\img\white-king.png").convert_alpha()
@@ -399,9 +399,14 @@ def validate_move(start, end, grid):
         else:
             return False
 
-def main(grid=None,prev_piece='b',limiter=None):
-    rows = 8
-    grid = grid if grid else make_grid(rows, WIDTH)
+GRID = make_grid(ROWS, WIDTH)
+
+def main(prev_piece='b',limiter='w'):
+    global GRID
+    global ROWS
+    
+    # rows = 8
+    # grid = grid if grid else make_grid(rows, WIDTH)
     
     picked = None
     
@@ -410,8 +415,9 @@ def main(grid=None,prev_piece='b',limiter=None):
     white_win = False
     black_win = False
 
+    
     while (not white_win and not black_win):
-        draw(grid,lambda:draw_grid(rows, WIDTH))
+        draw(GRID,lambda:draw_grid(ROWS, WIDTH))
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -419,16 +425,17 @@ def main(grid=None,prev_piece='b',limiter=None):
                 sys.exit()
                 
             if pygame.mouse.get_pressed()[0]: # left click
-                node = get_node(event.pos, grid, rows, WIDTH)
+                node = get_node(event.pos, GRID, ROWS, WIDTH)
                 print('LEFT: ',node,'picked:', picked, 'empty:',node.empty())
-                if limiter and node.get_piece_color() != limiter:
-                    break
+                
                 if not picked:
+                    if limiter and node.get_piece_color() != limiter:
+                            break
                     if not node.empty() and (node.get_piece_color() != prev_piece):
                         picked = node
                         node.selected()
                 else:
-                    if validate_move(picked, node, grid):
+                    if validate_move(picked, node, GRID):
                         temp_color = node.get_piece_color()
                         temp_name = node.get_piece_name()[1] if node.get_piece_name() else None
                         node.set_piece(picked.make_empty())
@@ -440,11 +447,12 @@ def main(grid=None,prev_piece='b',limiter=None):
                             else:
                                 white_win = True
                             break
+
                     picked.unselected()
                     picked = None
                     
             if pygame.mouse.get_pressed()[2]: # right click
-                node = get_node(event.pos, grid, rows, WIDTH)
+                node = get_node(event.pos, GRID, ROWS, WIDTH)
                 print('RIGHT: ',node,'picked:', picked, 'empty:',node.empty())
                 if picked:
                     picked.unselected()
@@ -452,7 +460,7 @@ def main(grid=None,prev_piece='b',limiter=None):
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    grid = make_grid(rows, WIDTH)
+                    GRID = make_grid(ROWS, WIDTH)
                     picked = None
                     prev_piece = 'b'
                     white_win = False
@@ -471,4 +479,63 @@ def main(grid=None,prev_piece='b',limiter=None):
                 sys.exit()
 
     pygame.display.update()
-    
+
+import socket
+import threading
+import pickle
+
+HEADER = 64 # len of msg in bites 
+PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+FORMATE = "utf-8"
+DISCONNECT_MSG = "!DISCONNECT"
+
+colors = {'b':'w', 'w':'b'}
+color = None
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(ADDR)
+
+msg = pickle.dump(GRID)
+
+client.send(msg)
+
+def updated_gird(grid):
+    client.send(pre_msg.encode('utf-8'))
+
+def client_receive():
+    while True:
+        try:
+            message = client.recv(1024).decode('utf-8')
+            if message == "quit" or message == "q":
+                break
+            if message == 'w' or message == 'b':
+                print(message, " color")
+            print(f"received: {message}")
+        except:
+            print('Error in client_receive!')
+            break
+    client.close()
+
+def client_send(pre_msg=None):
+    if pre_msg:
+        client.send(pre_msg.encode('utf-8'))
+    while True:
+        try:
+            message = "" # input("")
+            client.send(message.encode('utf-8'))
+            if message == "quit" or message == "q":
+                    break
+        except:
+            print('Error in client_send!')
+            break
+    client.close()
+
+receive_thread = threading.Thread(target=client_receive)
+receive_thread.start()
+
+send_thread = threading.Thread(target=client_send)
+send_thread.start()
+
+main()
